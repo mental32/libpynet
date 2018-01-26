@@ -8,10 +8,12 @@ import os
 import time
 import logging
 
+from discord.ext import commands
+
+import .critical
 import .utils
 from .exceptions import LibraryError
-
-from discord.ext import commands
+from .default_cogs import defaults
 ##
 
 __version__ = '3.3'
@@ -20,6 +22,29 @@ __start__ = time.time()
 
 def time_since_init():
 	return time.time()-__start__
+
+def check_data_integrity(settings, cogs='cogs/'):
+	try:
+		bot = commands.Bot(command_prefix=None)
+
+		assert os.path.exists(cogs), 'cog directory \'{0}\'was not found'.format(cogs)
+		assert os.path.isdir(cogs), 'cog directory\'{0}\' is not a directory'.format(cogs)
+
+		utils.json_wrapper(fp=settings)
+		assert settings.token, 'No token found in {0}'.format(settings)
+
+		for crit in (file[:-3] criticals if file.endswith('.py')):
+			bot.load_extension('bot.critical.'+crit)
+
+		for ext in (file[:-3] os.listdir(cogs.replace('/', '.')) if file.endswith('.py')):
+			bot.load_extension(cogs.replace('/', '.'))
+
+
+
+	except Exception as e:
+		raise e
+	else:
+		return True
 
 def run(settings, cogs='cogs', load_default=True):
 	# make sure we can load cogs
@@ -48,14 +73,13 @@ def run(settings, cogs='cogs', load_default=True):
 	# bind the settings to the bot
 	setattr(bot, 'settings', settings)
 
-	for critical_ext in (file[:-3] for file in os.listdir('bot/critical') if file.endswith('.py')):
+	for critical_ext in (file[:-3] for file in criticals if file.endswith('.py')):
 		try:
 			bot.load_extension('bot.critical.'+critical_ext)
 		except Exception as e:
 			raise LibraryError('\'bot/critical/\' is malformed, please make sure to update the library')
 
 	cogs = cogs.replace('/', '.')
-	defaults = [file[:-3] for file in os.listdir('.default_cogs/') if file.endswith('.py')]
 	for extension in (file[:-3] for file in os.listdir(cogs) if file.endswith('.py')):
 		try:
 			if extension in defaults:
