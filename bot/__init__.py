@@ -10,9 +10,9 @@ import logging
 
 from discord.ext import commands
 
-import .critical
 import .utils
-from .exceptions import LibraryError
+from .exceptions import *
+from .critical import criticals
 from .default_cogs import defaults
 ##
 
@@ -21,30 +21,25 @@ __author__ = 'mental'
 __start__ = time.time()
 
 def time_since_init():
+	''' return the time since the module initalised '''
 	return time.time()-__start__
 
-def check_data_integrity(settings, cogs='cogs/'):
+def check_data_integrity(settings=None):
+	''' check integrity of internal data and methods, with an optional external settings.json '''
 	try:
 		bot = commands.Bot(command_prefix=None)
 
-		assert os.path.exists(cogs), 'cog directory \'{0}\'was not found'.format(cogs)
-		assert os.path.isdir(cogs), 'cog directory\'{0}\' is not a directory'.format(cogs)
-
-		utils.json_wrapper(fp=settings)
-		assert settings.token, 'No token found in {0}'.format(settings)
+		if settings is not None:
+			settings = utils.json_wrapper(fp=settings)
+			assert settings.token, 'No token found in {0}'.format(settings)
 
 		for crit in (file[:-3] criticals if file.endswith('.py')):
 			bot.load_extension('bot.critical.'+crit)
 
-		for ext in (file[:-3] os.listdir(cogs.replace('/', '.')) if file.endswith('.py')):
-			bot.load_extension(cogs.replace('/', '.'))
-
-
-
+		for ext in (file[:-3] defaults if file.endswith('.py')):
+			bot.load_extension('bot.default_cogs.'+ext)
 	except Exception as e:
 		raise e
-	else:
-		return True
 
 def run(settings, cogs='cogs', load_default=True):
 	# make sure we can load cogs
