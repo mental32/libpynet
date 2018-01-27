@@ -10,7 +10,7 @@ import logging
 
 from discord.ext import commands
 
-from . import utils
+from .utils import *
 from .exceptions import *
 from .critical import criticals
 from .default_cogs import defaults
@@ -33,15 +33,16 @@ def check_data_integrity(settings=None):
 			settings = utils.json_wrapper(fp=settings)
 			assert settings.token, 'No token found in {0}'.format(settings)
 
-		for crit in (file[:-3] for file in criticals if file.endswith('.py')):
-			bot.load_extension('bot.critical.'+crit)
+		for crit in criticals:
+			bot.load_extension(crit)
 
-		for ext in (file[:-3] for file in defaults if file.endswith('.py')):
-			bot.load_extension('bot.default_cogs.'+ext)
+		for ext in defaults:
+			bot.load_extension(ext)
 	except Exception as e:
 		raise e
 
 def run(settings, cogs='cogs', load_default=True):
+	''' load critcal, clientmade and default cogs into the bot and run it '''
 	# make sure we can load cogs
 	assert os.path.exists(cogs), 'cog directory \'{0}\'was not found'.format(cogs)
 	assert os.path.isdir(cogs), 'cog directory\'{0}\' is not a directory'.format(cogs)
@@ -60,17 +61,17 @@ def run(settings, cogs='cogs', load_default=True):
 	# make sure a token is provided
 	assert settings.token, 'No token found in {0}'.format(settings)
 
-	if settings.remove_default_help:
-		# remove the default help supplied.
-		# we will be using our own
-		bot.remove_command('help')
+	with ignored(AttributeError):
+		if settings.remove_default_help:
+			# remove the default help supplied.
+			bot.remove_command('help')
 
 	# bind the settings to the bot
 	setattr(bot, 'settings', settings)
 
-	for critical_ext in (file[:-3] for file in criticals if file.endswith('.py')):
+	for critical_ext in criticals:
 		try:
-			bot.load_extension('bot.critical.'+critical_ext)
+			bot.load_extension(critical_ext)
 		except Exception as e:
 			raise LibraryError('\'bot/critical/\' is malformed, please make sure to update the library')
 
@@ -88,7 +89,7 @@ def run(settings, cogs='cogs', load_default=True):
 		if load_default:
 			try:
 				for default_ext in defaults:
-					bot.load_extension('bot.default_cogs.'+default_ext)
+					bot.load_extension(default_ext)
 			except Exception as e:
 				raise LibraryError('Got {0} exception while attempting to load a deafult cog'.format(e))
 

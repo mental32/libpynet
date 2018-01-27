@@ -10,3 +10,8 @@ def ignored(*exceptions):
 		yield
 	except exceptions:
 		pass
+
+@contextmanager
+def internal(bot):
+	with ignored(AttributeError):
+		yield bot.internal

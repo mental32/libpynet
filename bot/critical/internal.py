@@ -18,4 +18,4 @@ def wrap(bot):
 def setup(_bot):
 	global bot
 	bot = _bot
-	bot.internal = wrap(bot)
+	setattr(_bot, 'internal', wrap(bot))

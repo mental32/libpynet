@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # events.py
 ##
+import time
+
 from discord.ext import commands
 from ..exceptions import NullDestinationError
 from ..utils import event
@@ -17,8 +19,8 @@ async def on_connect():
 async def on_ready():
 	bot.internal.home.prepare(bot, guild_id=bot.settings.home_id)
 
-	taken = round(time.time()-bot.settings.tmp.connected, 2)
-	embed = discord.Embed(title='Ready', description=markdown('Achieved READY state in {0}ms'.format(taken)), colour=0x36393E)
+	bot.internal.ready = time.time()-bot.settings.tmp.connected
+	embed = discord.Embed(title='Ready', description=markdown('Achieved READY state in {0}ms'.format(round(bot.internal.taken, 2))), colour=0x36393E)
 
 	with ignored(NullDestinationError):
 		await bot.internal.home.log(embed=embed)

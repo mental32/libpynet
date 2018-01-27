@@ -26,8 +26,8 @@ class ihelp:
 
 	@property
 	def embed(self):
-		em = discord.Embed(title='help', colour=0xFFFFFF)
-		em.set_footer(text=_page, icon_url=self.ctx.author.avatar_url)
+		em = self.cog.format_help(self.commands[_page])
+		em.set_footer(text=str(_page), icon_url=self.ctx.author.avatar_url)
 
 		return em
 
