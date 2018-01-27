@@ -8,3 +8,6 @@ class LibraryError(Exception):
 
 class CriticalError(Exception):
 	pass
+
+class NullDestinationError(Exception):
+	pass

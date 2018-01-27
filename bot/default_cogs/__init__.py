@@ -3,5 +3,6 @@
 # __init__.py
 ##
 
-import .events
-import .help
+from . import (events, help)
+
+defaults = [events.__name__, help.__name__]

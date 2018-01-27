@@ -2,8 +2,12 @@
 # -*- coding: utf-8 -*-
 # events.py
 ##
+from discord.ext import commands
 from ..exceptions import NullDestinationError
+from ..utils import event
 ##
+
+events = []
 
 @event(events)
 async def on_connect():

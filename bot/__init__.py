@@ -10,7 +10,7 @@ import logging
 
 from discord.ext import commands
 
-import .utils
+from . import utils
 from .exceptions import *
 from .critical import criticals
 from .default_cogs import defaults
@@ -33,10 +33,10 @@ def check_data_integrity(settings=None):
 			settings = utils.json_wrapper(fp=settings)
 			assert settings.token, 'No token found in {0}'.format(settings)
 
-		for crit in (file[:-3] criticals if file.endswith('.py')):
+		for crit in (file[:-3] for file in criticals if file.endswith('.py')):
 			bot.load_extension('bot.critical.'+crit)
 
-		for ext in (file[:-3] defaults if file.endswith('.py')):
+		for ext in (file[:-3] for file in defaults if file.endswith('.py')):
 			bot.load_extension('bot.default_cogs.'+ext)
 	except Exception as e:
 		raise e

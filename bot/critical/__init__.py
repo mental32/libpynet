@@ -3,4 +3,6 @@
 # __init__.py
 ##
 
-import .internal
+from . import internal
+
+criticals = [internal.__name__]
