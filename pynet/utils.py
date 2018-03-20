@@ -3,7 +3,6 @@
 ##
 import json
 import os
-##
 
 class expanded_dict:
 	def walk(self, data):
