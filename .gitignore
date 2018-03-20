@@ -102,6 +102,5 @@ ENV/
 
 # lib specific stuff
 settings.json
-run.py
 __cogs/
 cogs/

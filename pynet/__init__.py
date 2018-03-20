@@ -1,6 +1,8 @@
 ##
 # -*- coding: utf-8 -*-
 ##
+import os
+
 from . import (bot, utils)
 from .package import Package
 
@@ -11,3 +13,6 @@ if Package.settings is None:
     Package.settings = utils.json_wrapper(Package.settings_fp)
 
 Package.bot = bot.Bot(Package.settings.token)
+
+if not os.path.exists('cogs/'):
+	os.mkdir('cogs/')
