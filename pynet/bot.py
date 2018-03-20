@@ -29,10 +29,12 @@ def setup_logger(filename='discord.log'):
 
 def run():
     '''run then bot'''
+    Bot._start = time.time()
     Bot._instance.run(Package.settings.token)
 
 def run_age():
-    '''Return how long the bot has been running'''
+    '''Return how long the bot has been running.
+    If the bot is not running it'll be how long since the Bot object has been instantiated.'''
     return (time.time() - Bot._instance._start)
 
 ### Bot #################################################################################
