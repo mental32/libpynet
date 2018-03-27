@@ -3,16 +3,20 @@
 ##
 import os
 import time
+import logging
 
 from discord.ext import commands
 
 from .package import Package
 
-def register_cogs(fp):
+def register_cogs(fp, predicate=None):
     '''register all cogs from a directory'''
     ext_fp = fp.replace('/', '.').replace('\\', '.')
     for filename in os.listdir(fp):
         if filename.endswith('.py'):
+            if predicate is not None and not predicate(filename):
+                continue
+
             try:
                 Bot._instance.load_extension('%s%s' %(ext_fp, filename[:-3]))
             except Exception as e:
@@ -23,8 +27,10 @@ def setup_logger(filename='discord.log'):
     '''Setup the logger for the package'''
     logger = logging.getLogger('discord')
     logger.setLevel(logging.INFO)
+
     handler = logging.FileHandler(filename=filename, encoding='utf-8', mode='w')
     handler.setFormatter(logging.Formatter('%(name)s: %(message)s'))
+
     logger.addHandler(handler)
 
 def run():

@@ -3,6 +3,14 @@
 ##
 import json
 import os
+import datetime
+
+def human_time():
+	date = datetime.datetime.now()
+	return ':'.join(str(item).zfill(2) for item in (date.hour, date.minute, date.second))
+
+def markdown(text, style=''):
+	return '```%s\n%s```' %(style, text)
 
 class expanded_dict:
 	def walk(self, data):
@@ -88,6 +96,7 @@ class json_wrapper:
 		if ready:
 			return data[key]
 			object.__getattribute__(self, 'walk_data')(data)
+			object.__getattribute__(self, '__write__')()
 		else:
 			return object.__getattribute__(self, key)
 
@@ -97,6 +106,7 @@ class json_wrapper:
 		if ready:
 			return data[key]
 			object.__getattribute__(self, 'walk_data')(data)
+			object.__getattribute__(self, '__write__')()
 		else:
 			return object.__getattribute__(self, key)
 
