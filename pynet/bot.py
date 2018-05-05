@@ -5,9 +5,36 @@ import os
 import time
 import logging
 
+import discord
 from discord.ext import commands
 
 from .package import Package
+
+def remove_command(*args, **kwargs):
+    '''create an alias to commands.Bot.remove_command'''
+    Bot._instance.remove_command(*args, **kwargs)
+
+def get_statistics():
+    '''returns a dict of the bots statistics'''
+    bot = Bot._instance
+    return {
+        'ws_latency': bot.latency,
+        'user': bot.user,
+        'users': len(bot.users),
+        'guilds': len(bot.guilds),
+        'emojis': len(bot.emojis),
+        'private_channels': len(bot.private_channels),
+        'voice_clients': len(bot.voice_clients),
+    }
+
+def estimate_cogs(fp, predicate=None):
+    predicate = predicate or (lambda arg: True)
+    endswith_py = lambda fn: fn.endswith('.py')
+
+    python_files = filter(endswith_py, os.listdir(fp))
+    avaliabe_cogs = filter(predicate, python_files)
+
+    return len((*avaliabe_cogs,))
 
 def register_cogs(fp, predicate=None):
     '''register all cogs from a directory'''
