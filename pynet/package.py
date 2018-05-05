@@ -29,5 +29,5 @@ class Package:
 
         Package.events[event_type].append(data)
 
-        for dispatcher in Package.dispatchers[event_type]:
+        for dispatcher in Package.dispatchers.get(event_type, []):
             Package.bot.loop.create_task(dispatcher(data))
