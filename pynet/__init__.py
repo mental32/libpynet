@@ -15,4 +15,4 @@ if Package.settings is None:
 Package.bot = bot.Bot(Package.settings.prefix)
 
 if not os.path.exists('cogs/'):
-	os.mkdir('cogs/')
+    os.mkdir('cogs/')

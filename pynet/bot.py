@@ -8,7 +8,15 @@ import logging
 import discord
 from discord.ext import commands
 
+from . import prebuilt
 from .package import Package
+
+_prebuilt_lookup = {
+    'master': prebuilt.Master
+}
+
+is_module = lambda fp: os.path.isdir(fp) and '__init__.py' in os.listdir(fp)
+endswith_py = lambda fn: fn.endswith('.py')
 
 def remove_command(*args, **kwargs):
     '''create an alias to commands.Bot.remove_command'''
@@ -29,26 +37,43 @@ def get_statistics():
 
 def estimate_cogs(fp, predicate=None):
     predicate = predicate or (lambda arg: True)
-    endswith_py = lambda fn: fn.endswith('.py')
 
-    python_files = filter(endswith_py, os.listdir(fp))
-    avaliabe_cogs = filter(predicate, python_files)
+    modules = filter(lambda fn: is_module(fp+'/'+fn), os.listdir(fp))
+    avaliabe_cogs = filter(endswith_py, os.listdir(fp))
 
     return len((*avaliabe_cogs,))
 
 def register_cogs(fp, predicate=None):
     '''register all cogs from a directory'''
+    count = 0
+    predicate = predicate or (lambda arg: True)
     ext_fp = fp.replace('/', '.').replace('\\', '.')
-    for filename in os.listdir(fp):
-        if filename.endswith('.py'):
-            if predicate is not None and not predicate(filename):
-                continue
 
-            try:
-                Bot._instance.load_extension('%s%s' %(ext_fp, filename[:-3]))
-            except Exception as e:
-                Bot._instance.package.push_event(Exception, e)
-                print(filename, e)
+    python_files = filter(endswith_py, os.listdir(fp))
+    modules = filter(lambda fn: is_module(fp+'/'+fn), os.listdir(fp))
+
+    for script in filter(predicate, list(python_files) + list(modules)):
+        try:
+            if script.endswith('.py'):
+                script = script[:-3]
+
+            Bot._instance.load_extension('%s%s' %(ext_fp, script))
+            count += 1
+        except Exception as trace:
+            Package.push_event(Exception, trace)
+    else:
+        return count
+
+def add_prebuilt(*names):
+    for name in names:
+        try:
+            Package.bot.add_cog(_prebuilt_lookup[name]())
+
+        except KeyError as e:
+            raise KeyError('No prebuilt found with name: %s' %(name))
+
+        except Exception as e:
+            raise
 
 def setup_logger(filename='discord.log'):
     '''Setup the logger for the package'''
@@ -57,11 +82,10 @@ def setup_logger(filename='discord.log'):
 
     handler = logging.FileHandler(filename=filename, encoding='utf-8', mode='w')
     handler.setFormatter(logging.Formatter('%(name)s: %(message)s'))
-
     logger.addHandler(handler)
 
 def run():
-    '''run then bot'''
+    '''run the bot'''
     Bot._start = time.time()
     Bot._instance.run(Package.settings.token)
 
@@ -80,3 +104,8 @@ class Bot(commands.Bot):
         Bot._instance = self
         self._start = time.time()
         super(Bot, self).__init__(*args, **kwargs)
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        await self.process_commands(message)
