@@ -4,9 +4,10 @@
 import pynet
 
 try:
-    pynet.bot.register_cogs('cogs/')
+    pynet.bot.add_prebuilt('master')
+
+    cogs = pynet.bot.register_cogs('cogs/')
+    print('[%s] Registered %s cogs' %(pynet.utils.human_time(), cogs))
     pynet.bot.run()
-except Exception as e:
-    print('Caught root level exception: %s' %(e))
 finally:
     print('Ran for %s seconds' %(round(pynet.bot.run_age(), 2)))
